@@ -136,8 +136,8 @@ def create_summary_sanity(src):
         "Max Shortest Distance Between Pairs (cm)",
         "Computed Radius (cm)",
         "Removed Points",
-        "Unreachable Fuzzy Fls Pairs",
-        "Total Fuzzy Fls Pairs",
+        "Unreachable Blind Fls Pairs",
+        "Total Blind Fls Pairs",
         "Kissing Neighbors",
     ]
 
@@ -162,8 +162,8 @@ def create_summary_sanity(src):
                         *get_stats_by_name(rows, "Shortest Distance Between Pairs (cm)")[:3],
                         get_value_by_name(rows, "Computed Radius (cm)"),
                         get_value_by_name(rows, "Removed Points"),
-                        get_value_by_name(rows, "Unreachable Fuzzy FLS Pairs"),
-                        get_value_by_name(rows, "Total Fuzzy FLS Pairs"),
+                        get_value_by_name(rows, "Unreachable Blind FLS Pairs"),
+                        get_value_by_name(rows, "Total Blind FLS Pairs"),
                     ])
     return summary_rows
 
@@ -177,8 +177,8 @@ def create_summary_solutions(src):
         "Technique",
         "Shape",
         "Beta",
-        "# Fuzzy Pairs",
-        "# Fuzzy Pair w/out Pose",
+        "# Blind Pairs",
+        "# Blind Pair w/out Pose",
         "# Solution Applied",
         "# Solution Worked",
         'Min Total Dist Moved (cm)',
@@ -224,8 +224,8 @@ def create_summary_solutions(src):
                         tech,
                         shape,
                         beta,
-                        get_value_by_name(rows, "Total Fuzzy FLS Pairs"),
-                        get_value_by_name(rows, "Unreachable Fuzzy FLS Pairs"),
+                        get_value_by_name(rows, "Total Blind FLS Pairs"),
+                        get_value_by_name(rows, "Unreachable Blind FLS Pairs"),
                         get_value_by_name(rows, "Total Times Solution Applied"),
                         get_value_by_name(rows, "Total Times Solution Worked"),
                         *get_stats_by_name(rows, dist_moved_metric),

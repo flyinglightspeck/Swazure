@@ -52,9 +52,9 @@ if __name__ == "__main__":
     hop_results2 = export_metric(data, "hops", "Move Obstructing", ["Kangaroo"], "Total Times Solution Worked", "Mean", get_value=True)
     hop_results3 = export_metric(data, "hops", "Move Source (t=2)", ["Kangaroo"], "Total Times Solution Applied", "Mean", get_value=True)
     hop_results4 = export_metric(data, "hops", "Move Source (t=2)", ["Kangaroo"], "Total Times Solution Worked", "Mean", get_value=True)
-    # hop_results1 = export_metric(data, "hops", "Shortest Path", ["Dragon", "Skateboard"], "Unreachable Fuzzy Fls Pairs", "Mean", get_value=True)
-    # hop_results2 = export_metric(data, "hops", "Shortest Path", ["Dragon", "Skateboard"], "Total Fuzzy Fls Pairs", "Mean", get_value=True)
-    # weight_results = export_metric(data, "length", "Shortest Path", ["Kangaroo"], "Unreachable Fuzzy Fls Pairs", "Mean", get_value=True)
+    # hop_results1 = export_metric(data, "hops", "Shortest Path", ["Dragon", "Skateboard"], "Unreachable Blind Fls Pairs", "Mean", get_value=True)
+    # hop_results2 = export_metric(data, "hops", "Shortest Path", ["Dragon", "Skateboard"], "Total Blind Fls Pairs", "Mean", get_value=True)
+    # weight_results = export_metric(data, "length", "Shortest Path", ["Kangaroo"], "Unreachable Blind Fls Pairs", "Mean", get_value=True)
     # weight_results = export_metric(data, "length", "Shortest Path", ["Racecar"], "Phi Error (degree)", "Max", get_value=False)
 
 

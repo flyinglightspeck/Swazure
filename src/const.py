@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class PathCol(Enum):
+class PathShortestCol(Enum):
     SOURCE = 'Source'
     TARGET = 'Target'
     SHORTEST_PATH = 'Shortest Path'
@@ -25,7 +25,7 @@ class PathCol(Enum):
         return self.value
 
 
-class PathDualCol(Enum):
+class PathAveragingCol(Enum):
     SOURCE = 'Source'
     TARGET = 'Target'
     SHORTEST_PATH_1 = 'Shortest Path 1'
@@ -96,7 +96,7 @@ class PathMoveSourceCol(Enum):
     EDGE_TYPES = 'Edge Types'
     SWEET_HOPS = 'Sweet Hops'
     DECAYING_HOPS = 'Decaying Hops'
-    FUZZY_HOPS = 'Fuzzy Hops'
+    BLIND_HOPS = 'Blind Hops'
     NUM_MOVED = 'Number of Times Source Moved'
     TOTAL_DIST_SOURCE_MOVED = 'Total Dist Source Moved (cm)'
     RELATIVE_DIST_SOURCE_MOVED = 'Relative Dist Source Moved (cm)'
@@ -135,7 +135,7 @@ class PropCol(Enum):
 
 
 class EdgeType(Enum):
-    FUZZY = 'Fuzzy'
+    BLIND = 'Blind'
     SWEET = 'Sweet'
     DECAYING = 'Decaying'
     ALL = 'All'

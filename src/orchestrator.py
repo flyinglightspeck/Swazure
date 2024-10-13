@@ -19,7 +19,7 @@ class Orchestrator:
         self.dist_center = None
         self.sorted_neighbor_ids = None
         self.sorted_neighbor_dists = None
-        self.fuzzy_neighbors = None
+        self.blind_neighbors = None
         self.all_sweet_neighbors = None
         self.visible_sweet_neighbors = None
         self.all_decaying_neighbors = None
@@ -51,7 +51,7 @@ class Orchestrator:
         self.remove_colliding_points()
         self.compute_dist_tracking()
         self.sort_neighbors()
-        self.compute_fuzzy_neighbors()
+        self.compute_blind_neighbors()
         self.compute_sweet_neighbors()
         self.compute_decaying_neighbors()
         self.combine_sweet_and_decay_neighbors()
@@ -113,8 +113,8 @@ class Orchestrator:
         self.sorted_neighbor_ids = np.argsort(self.dist_tracking, axis=1)
         self.sorted_neighbor_dists = np.take_along_axis(self.dist_tracking, self.sorted_neighbor_ids, axis=1)
 
-    def compute_fuzzy_neighbors(self):
-        self.fuzzy_neighbors = [self.sorted_neighbor_ids[i][
+    def compute_blind_neighbors(self):
+        self.blind_neighbors = [self.sorted_neighbor_ids[i][
                                     (self.sorted_neighbor_dists[i] > 0) &
                                     (self.sorted_neighbor_dists[i] < self.args.sweet_range_min)
                                     ] for i in
@@ -205,7 +205,7 @@ class Orchestrator:
         tracking_dist = np.linalg.norm(u - v) - self.radius * 2
 
         if tracking_dist < self.args.sweet_range_min:
-            return EdgeType.FUZZY
+            return EdgeType.BLIND
         elif tracking_dist <= self.args.sweet_range_max:
             return EdgeType.SWEET
         else:
@@ -215,10 +215,10 @@ class Orchestrator:
     def get_path_hops(edge_types):
         num_sweet_hops = edge_types.count(EdgeType.SWEET.value)
         num_decaying_hops = edge_types.count(EdgeType.DECAYING.value)
-        num_fuzzy_hops = edge_types.count(EdgeType.FUZZY.value)
+        num_blind_hops = edge_types.count(EdgeType.BLIND.value)
 
         if len(edge_types):
-            return len(edge_types), num_sweet_hops, num_decaying_hops, num_fuzzy_hops
+            return len(edge_types), num_sweet_hops, num_decaying_hops, num_blind_hops
         else:
             return None, None, None, None
 

@@ -4,7 +4,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from const import PathStatus, PathCol, PropCol, PathDualCol, StatCol, PathMoveBlockingCol, PathMoveSourceCol, EdgeType
+from const import PathStatus, PathShortestCol, PropCol, PathAveragingCol, StatCol, PathMoveBlockingCol, PathMoveSourceCol, EdgeType
 from offline_alg import OfflineAlg
 from utils import angle_between_vectors, diff_spherical_angles
 
@@ -49,7 +49,7 @@ class SwarmLocatorShortest(OfflineAlg):
     def run(self):
         result_rows = []
         for i in range(len(self.orc.visible_sweet_neighbors)):
-            for j in self.orc.fuzzy_neighbors[i]:
+            for j in self.orc.blind_neighbors[i]:
                 shortest_path, edge_types, sweet_path_status, decaying_path_status = self.compute_path(i, j)
                 num_total_hops, num_sweet_hops, num_decaying_hops, _ = self.orc.get_path_hops(edge_types)
                 c_pose = self.orc.compute_relative_pose_by_path(shortest_path)
@@ -79,7 +79,7 @@ class SwarmLocatorShortest(OfflineAlg):
                         d_theta,
                         d_phi
                     ])
-        self.df = pd.DataFrame(result_rows, columns=list(PathCol))
+        self.df = pd.DataFrame(result_rows, columns=list(PathShortestCol))
 
     def get_file_name(self):
         w_flag = '_w_' if self.orc.args.weighted else '_'
@@ -87,37 +87,37 @@ class SwarmLocatorShortest(OfflineAlg):
 
     def store(self):
         args_df = pd.DataFrame(list(vars(self.orc.args).items()), columns=list(PropCol))
-        grouped = self.df.groupby(PathCol.SOURCE)
-        unreachable_percentage = grouped[PathCol.SHORTEST_PATH_LENGTH].apply(
+        grouped = self.df.groupby(PathShortestCol.SOURCE)
+        unreachable_percentage = grouped[PathShortestCol.SHORTEST_PATH_LENGTH].apply(
             lambda x: x.isnull().mean() * 100).reset_index(
             name='value')
-        decaying_paths_df = self.df[self.df[PathCol.DECAYING_PATH_TYPE] == PathStatus.EXISTS]
-        sweet_paths_df = self.df[self.df[PathCol.SWEET_PATH_TYPE] == PathStatus.EXISTS]
+        decaying_paths_df = self.df[self.df[PathShortestCol.DECAYING_PATH_TYPE] == PathStatus.EXISTS]
+        sweet_paths_df = self.df[self.df[PathShortestCol.SWEET_PATH_TYPE] == PathStatus.EXISTS]
 
         stat_rows = [
             ['Shortest Distance Between Pairs (cm)', None, self.orc.min_dist, self.orc.avg_dist, self.orc.max_dist],
             ['Computed Radius (cm)', self.orc.radius],
             ['Removed Points', len(self.orc.colliding_points)],
-            ['Unreachable Fuzzy Fls Pairs', self.df[PathCol.SHORTEST_PATH_LENGTH].isnull().sum()],
-            ['Total Fuzzy Fls Pairs', self.df.shape[0]],
-            ['Percentage of Unreachable Fuzzy Neighbors (%)', *get_col_stats(unreachable_percentage['value'])],
+            ['Unreachable Blind Fls Pairs', self.df[PathShortestCol.SHORTEST_PATH_LENGTH].isnull().sum()],
+            ['Total Blind Fls Pairs', self.df.shape[0]],
+            ['Percentage of Unreachable Blind Neighbors (%)', *get_col_stats(unreachable_percentage['value'])],
             ['Kissing Neighbors', self.orc.num_kissing_neighbors],
-            ['Pairs w/ No Sweet Path', (self.df[PathCol.SWEET_PATH_TYPE] == PathStatus.NO_PATH).sum()],
-            ['Pairs w/ Blocked Sweet Path', (self.df[PathCol.SWEET_PATH_TYPE] == PathStatus.BLOCKED).sum()],
-            ['Pairs w/ Sweet Path', (self.df[PathCol.SWEET_PATH_TYPE] == PathStatus.EXISTS).sum()],
-            ['Pairs w/ Decaying Path', (self.df[PathCol.DECAYING_PATH_TYPE] == PathStatus.EXISTS).sum()],
-            ['Hops of All Paths', *get_col_stats(self.df[PathCol.SHORTEST_PATH_LENGTH])],
-            ['Hops of Sweet Paths', *get_col_stats(sweet_paths_df[PathCol.SHORTEST_PATH_LENGTH])],
-            ['Hops of Decaying Paths', *get_col_stats(decaying_paths_df[PathCol.SHORTEST_PATH_LENGTH])],
-            ['Decaying Hops of Decaying Paths', *get_col_stats(decaying_paths_df[PathCol.DECAYING_HOPS])],
-            ['Sweet Hops of Decaying Paths', *get_col_stats(decaying_paths_df[PathCol.SWEET_HOPS])],
-            ['Weight of All Paths', *get_col_stats(self.df[PathCol.SHORTEST_PATH_WEIGHT])],
-            ['Weight of Sweet Paths', *get_col_stats(sweet_paths_df[PathCol.SHORTEST_PATH_WEIGHT])],
-            ['Weight of Decaying Paths', *get_col_stats(decaying_paths_df[PathCol.SHORTEST_PATH_WEIGHT])],
-            ['Distance Error (%)', *get_col_stats(self.df[PathCol.DIST_ERROR])],
-            ['Angle Error (degree)', *get_col_stats(self.df[PathCol.ANGLE_ERROR])],
-            ['Theta Error (degree)', *get_col_stats(self.df[PathCol.THETA_ERROR])],
-            ['Phi Error (degree)', *get_col_stats(self.df[PathCol.PHI_ERROR])],
+            ['Pairs w/ No Sweet Path', (self.df[PathShortestCol.SWEET_PATH_TYPE] == PathStatus.NO_PATH).sum()],
+            ['Pairs w/ Blocked Sweet Path', (self.df[PathShortestCol.SWEET_PATH_TYPE] == PathStatus.BLOCKED).sum()],
+            ['Pairs w/ Sweet Path', (self.df[PathShortestCol.SWEET_PATH_TYPE] == PathStatus.EXISTS).sum()],
+            ['Pairs w/ Decaying Path', (self.df[PathShortestCol.DECAYING_PATH_TYPE] == PathStatus.EXISTS).sum()],
+            ['Hops of All Paths', *get_col_stats(self.df[PathShortestCol.SHORTEST_PATH_LENGTH])],
+            ['Hops of Sweet Paths', *get_col_stats(sweet_paths_df[PathShortestCol.SHORTEST_PATH_LENGTH])],
+            ['Hops of Decaying Paths', *get_col_stats(decaying_paths_df[PathShortestCol.SHORTEST_PATH_LENGTH])],
+            ['Decaying Hops of Decaying Paths', *get_col_stats(decaying_paths_df[PathShortestCol.DECAYING_HOPS])],
+            ['Sweet Hops of Decaying Paths', *get_col_stats(decaying_paths_df[PathShortestCol.SWEET_HOPS])],
+            ['Weight of All Paths', *get_col_stats(self.df[PathShortestCol.SHORTEST_PATH_WEIGHT])],
+            ['Weight of Sweet Paths', *get_col_stats(sweet_paths_df[PathShortestCol.SHORTEST_PATH_WEIGHT])],
+            ['Weight of Decaying Paths', *get_col_stats(decaying_paths_df[PathShortestCol.SHORTEST_PATH_WEIGHT])],
+            ['Distance Error (%)', *get_col_stats(self.df[PathShortestCol.DIST_ERROR])],
+            ['Angle Error (degree)', *get_col_stats(self.df[PathShortestCol.ANGLE_ERROR])],
+            ['Theta Error (degree)', *get_col_stats(self.df[PathShortestCol.THETA_ERROR])],
+            ['Phi Error (degree)', *get_col_stats(self.df[PathShortestCol.PHI_ERROR])],
         ]
 
         stats_df = pd.DataFrame(stat_rows, columns=list(StatCol))
@@ -174,7 +174,7 @@ class SwarmLocatorAveraging(OfflineAlg):
     def run(self):
         result_rows = []
         for i in range(len(self.orc.visible_sweet_neighbors)):
-            for j in self.orc.fuzzy_neighbors[i]:
+            for j in self.orc.blind_neighbors[i]:
                 shortest_paths, sweet_path_status, decaying_path_status = self.compute_two_path(i, j)
                 path1 = shortest_paths[0]
                 path2 = shortest_paths[1] if len(shortest_paths) == 2 else []
@@ -222,7 +222,7 @@ class SwarmLocatorAveraging(OfflineAlg):
                         d_theta,
                         d_phi
                     ])
-        self.df = pd.DataFrame(result_rows, columns=list(PathDualCol))
+        self.df = pd.DataFrame(result_rows, columns=list(PathAveragingCol))
 
     def get_file_name(self):
         w_flag = '_w_' if self.orc.args.weighted else '_'
@@ -230,8 +230,8 @@ class SwarmLocatorAveraging(OfflineAlg):
 
     def store(self):
         args_df = pd.DataFrame(list(vars(self.orc.args).items()), columns=list(PropCol))
-        grouped = self.df.groupby(PathDualCol.SOURCE)
-        unreachable_percentage = grouped[PathDualCol.SHORTEST_PATH_1_LENGTH].apply(
+        grouped = self.df.groupby(PathAveragingCol.SOURCE)
+        unreachable_percentage = grouped[PathAveragingCol.SHORTEST_PATH_1_LENGTH].apply(
             lambda x: x.isnull().mean() * 100).reset_index(
             name='value')
         # decaying_paths_df = self.df[self.df[PathDualCol.DECAYING_PATH_TYPE] == PathStatus.EXISTS]
@@ -241,34 +241,34 @@ class SwarmLocatorAveraging(OfflineAlg):
             ['Shortest Distance Between Pairs (cm)', None, self.orc.min_dist, self.orc.avg_dist, self.orc.max_dist],
             ['Computed Radius (cm)', self.orc.radius],
             ['Removed Points', len(self.orc.colliding_points)],
-            ['Unreachable Fuzzy Fls Pairs', self.df[PathDualCol.SHORTEST_PATH_1_LENGTH].isnull().sum()],
-            ['Total Fuzzy Fls Pairs', self.df.shape[0]],
-            ['Percentage of Unreachable Fuzzy Neighbors (%)', *get_col_stats(unreachable_percentage['value'])],
+            ['Unreachable Blind Fls Pairs', self.df[PathAveragingCol.SHORTEST_PATH_1_LENGTH].isnull().sum()],
+            ['Total Blind Fls Pairs', self.df.shape[0]],
+            ['Percentage of Unreachable Blind Neighbors (%)', *get_col_stats(unreachable_percentage['value'])],
             ['Kissing Neighbors', self.orc.num_kissing_neighbors],
-            ['Pairs w/ 1 Sweet Path', ((self.df[PathDualCol.SWEET_PATH_1_TYPE] == PathStatus.EXISTS) ^ (
-                    self.df[PathDualCol.SWEET_PATH_2_TYPE] == PathStatus.EXISTS)).sum()],
-            ['Pairs w/ 2 Sweet Path', ((self.df[PathDualCol.SWEET_PATH_1_TYPE] == PathStatus.EXISTS) & (
-                    self.df[PathDualCol.SWEET_PATH_2_TYPE] == PathStatus.EXISTS)).sum()],
-            ['Pairs w/ 2 Decaying Path', ((self.df[PathDualCol.DECAYING_PATH_1_TYPE] == PathStatus.EXISTS) & (
-                    self.df[PathDualCol.DECAYING_PATH_2_TYPE] == PathStatus.EXISTS)).sum()],
-            ['Pairs w/ only 1 Sweet Path', ((self.df[PathDualCol.SWEET_PATH_1_TYPE] == PathStatus.EXISTS) & (
-                    self.df[PathDualCol.SWEET_PATH_2_TYPE] != PathStatus.EXISTS) & (self.df[
-                                                                                        PathDualCol.DECAYING_PATH_1_TYPE] != PathStatus.EXISTS)).sum()],
-            ['Pairs w/ only 1 Decaying Path', ((self.df[PathDualCol.DECAYING_PATH_1_TYPE] == PathStatus.EXISTS) & (
-                    self.df[PathDualCol.DECAYING_PATH_2_TYPE] != PathStatus.EXISTS) & (self.df[
-                                                                                           PathDualCol.SWEET_PATH_1_TYPE] != PathStatus.EXISTS)).sum()],
-            ['Hops of Path 1', *get_col_stats(self.df[PathDualCol.SHORTEST_PATH_1_LENGTH])],
-            ['Hops of Path 2', *get_col_stats(self.df[PathDualCol.SHORTEST_PATH_2_LENGTH])],
-            ['Weight of Path 1', *get_col_stats(self.df[PathDualCol.SHORTEST_PATH_1_WEIGHT])],
-            ['Weight of Path 2', *get_col_stats(self.df[PathDualCol.SHORTEST_PATH_2_WEIGHT])],
-            ['Sweet Hops of Path 1', *get_col_stats(self.df[PathDualCol.SWEET_HOPS_1])],
-            ['Sweet Hops of Path 2', *get_col_stats(self.df[PathDualCol.SWEET_HOPS_2])],
-            ['Decaying Hops of Path 1', *get_col_stats(self.df[PathDualCol.DECAYING_HOPS_1])],
-            ['Decaying Hops of Path 2', *get_col_stats(self.df[PathDualCol.DECAYING_HOPS_2])],
-            ['Distance Error (%)', *get_col_stats(self.df[PathDualCol.DIST_ERROR])],
-            ['Angle Error (degree)', *get_col_stats(self.df[PathDualCol.ANGLE_ERROR])],
-            ['Theta Error (degree)', *get_col_stats(self.df[PathDualCol.THETA_ERROR])],
-            ['Phi Error (degree)', *get_col_stats(self.df[PathDualCol.PHI_ERROR])],
+            ['Pairs w/ 1 Sweet Path', ((self.df[PathAveragingCol.SWEET_PATH_1_TYPE] == PathStatus.EXISTS) ^ (
+                    self.df[PathAveragingCol.SWEET_PATH_2_TYPE] == PathStatus.EXISTS)).sum()],
+            ['Pairs w/ 2 Sweet Path', ((self.df[PathAveragingCol.SWEET_PATH_1_TYPE] == PathStatus.EXISTS) & (
+                    self.df[PathAveragingCol.SWEET_PATH_2_TYPE] == PathStatus.EXISTS)).sum()],
+            ['Pairs w/ 2 Decaying Path', ((self.df[PathAveragingCol.DECAYING_PATH_1_TYPE] == PathStatus.EXISTS) & (
+                    self.df[PathAveragingCol.DECAYING_PATH_2_TYPE] == PathStatus.EXISTS)).sum()],
+            ['Pairs w/ only 1 Sweet Path', ((self.df[PathAveragingCol.SWEET_PATH_1_TYPE] == PathStatus.EXISTS) & (
+                    self.df[PathAveragingCol.SWEET_PATH_2_TYPE] != PathStatus.EXISTS) & (self.df[
+                                                                                        PathAveragingCol.DECAYING_PATH_1_TYPE] != PathStatus.EXISTS)).sum()],
+            ['Pairs w/ only 1 Decaying Path', ((self.df[PathAveragingCol.DECAYING_PATH_1_TYPE] == PathStatus.EXISTS) & (
+                    self.df[PathAveragingCol.DECAYING_PATH_2_TYPE] != PathStatus.EXISTS) & (self.df[
+                                                                                           PathAveragingCol.SWEET_PATH_1_TYPE] != PathStatus.EXISTS)).sum()],
+            ['Hops of Path 1', *get_col_stats(self.df[PathAveragingCol.SHORTEST_PATH_1_LENGTH])],
+            ['Hops of Path 2', *get_col_stats(self.df[PathAveragingCol.SHORTEST_PATH_2_LENGTH])],
+            ['Weight of Path 1', *get_col_stats(self.df[PathAveragingCol.SHORTEST_PATH_1_WEIGHT])],
+            ['Weight of Path 2', *get_col_stats(self.df[PathAveragingCol.SHORTEST_PATH_2_WEIGHT])],
+            ['Sweet Hops of Path 1', *get_col_stats(self.df[PathAveragingCol.SWEET_HOPS_1])],
+            ['Sweet Hops of Path 2', *get_col_stats(self.df[PathAveragingCol.SWEET_HOPS_2])],
+            ['Decaying Hops of Path 1', *get_col_stats(self.df[PathAveragingCol.DECAYING_HOPS_1])],
+            ['Decaying Hops of Path 2', *get_col_stats(self.df[PathAveragingCol.DECAYING_HOPS_2])],
+            ['Distance Error (%)', *get_col_stats(self.df[PathAveragingCol.DIST_ERROR])],
+            ['Angle Error (degree)', *get_col_stats(self.df[PathAveragingCol.ANGLE_ERROR])],
+            ['Theta Error (degree)', *get_col_stats(self.df[PathAveragingCol.THETA_ERROR])],
+            ['Phi Error (degree)', *get_col_stats(self.df[PathAveragingCol.PHI_ERROR])],
         ]
 
         stats_df = pd.DataFrame(stat_rows, columns=list(StatCol))
@@ -339,7 +339,7 @@ class SwarmLocatorMoveBlocking(OfflineAlg):
         use_decaying = '+' in self.orc.args.solution
         result_rows = []
         for i in range(len(self.orc.visible_sweet_neighbors)):
-            for j in self.orc.fuzzy_neighbors[i]:
+            for j in self.orc.blind_neighbors[i]:
                 shortest_path, edge_types, sweet_path_status, decaying_path_status = self.compute_visible_sweet_path(i,
                                                                                                                      j)
                 num_blocking, total_dist_moved, min_dist_moved, avg_dist_moved, max_dist_moved, occlusion_remains = 0, None, None, None, None, None
@@ -413,12 +413,12 @@ class SwarmLocatorMoveBlocking(OfflineAlg):
             ['Shortest Distance Between Pairs (cm)', None, self.orc.min_dist, self.orc.avg_dist, self.orc.max_dist],
             ['Computed Radius (cm)', self.orc.radius],
             ['Removed Points', len(self.orc.colliding_points)],
-            ['Unreachable Fuzzy FLS Pairs', self.df[PathMoveBlockingCol.SHORTEST_PATH_LENGTH].isnull().sum()],
-            ['Total Fuzzy FLS Pairs', self.df.shape[0]],
+            ['Unreachable Blind FLS Pairs', self.df[PathMoveBlockingCol.SHORTEST_PATH_LENGTH].isnull().sum()],
+            ['Total Blind FLS Pairs', self.df.shape[0]],
             ['Total Times Solution Applied', self.df[PathMoveBlockingCol.CANNOT_RESOLVE_OCCLUSION].notna().sum()],
             ['Total Times Solution Worked',
              self.df[self.df[PathMoveBlockingCol.CANNOT_RESOLVE_OCCLUSION] == False].shape[0]],
-            ['Percentage of Unreachable Fuzzy Neighbors (%)', *get_col_stats(unreachable_percentage['value'])],
+            ['Percentage of Unreachable Blind Neighbors (%)', *get_col_stats(unreachable_percentage['value'])],
             ['Kissing Neighbors', self.orc.num_kissing_neighbors],
             ['Pairs w/ No Sweet Path', (self.df[PathMoveBlockingCol.SWEET_PATH_TYPE] == PathStatus.NO_PATH).sum()],
             ['Pairs w/ Blocked Sweet Path', (self.df[PathMoveBlockingCol.SWEET_PATH_TYPE] == PathStatus.BLOCKED).sum()],
@@ -523,7 +523,7 @@ class SwarmLocatorMoveSource(OfflineAlg):
 
         result_rows = []
         for i in range(len(self.orc.visible_sweet_neighbors)):
-            for j in self.orc.fuzzy_neighbors[i]:
+            for j in self.orc.blind_neighbors[i]:
                 shortest_path, edge_types, sweet_path_status = self.compute_sweet_path(i, j)
                 path_weight = self.orc.get_path_weight(shortest_path)
                 c_pose = self.orc.compute_relative_pose_by_path(shortest_path)
@@ -546,7 +546,7 @@ class SwarmLocatorMoveSource(OfflineAlg):
                         path_weight = self.orc.get_path_weight(shortest_path)
                         c_pose = self.orc.compute_relative_pose_by_path(shortest_path)
 
-                num_total_hops, num_sweet_hops, num_decaying_hops, num_fuzzy_hops = self.orc.get_path_hops(edge_types)
+                num_total_hops, num_sweet_hops, num_decaying_hops, num_blind_hops = self.orc.get_path_hops(edge_types)
                 gt_pose = self.orc.points[j] - new_coord
                 norm_c_pose = np.linalg.norm(c_pose)
                 norm_gt_pose = np.linalg.norm(gt_pose)
@@ -565,7 +565,7 @@ class SwarmLocatorMoveSource(OfflineAlg):
                         edge_types,
                         num_sweet_hops,
                         num_decaying_hops,
-                        num_fuzzy_hops,
+                        num_blind_hops,
                         num_moved,
                         total_dist_moved,
                         relative_dist_moved,
@@ -598,24 +598,24 @@ class SwarmLocatorMoveSource(OfflineAlg):
             ['Shortest Distance Between Pairs (cm)', None, self.orc.min_dist, self.orc.avg_dist, self.orc.max_dist],
             ['Computed Radius (cm)', self.orc.radius],
             ['Removed Points', len(self.orc.colliding_points)],
-            ['Unreachable Fuzzy FLS Pairs', self.df[PathMoveSourceCol.SHORTEST_PATH_LENGTH].isnull().sum()],
-            ['Total Fuzzy FLS Pairs', self.df.shape[0]],
+            ['Unreachable Blind FLS Pairs', self.df[PathMoveSourceCol.SHORTEST_PATH_LENGTH].isnull().sum()],
+            ['Total Blind FLS Pairs', self.df.shape[0]],
             ['Total Times Solution Applied', self.df[PathMoveSourceCol.NUM_MOVED].notna().sum()],
             ['Total Times Solution Worked', len(self.df[(self.df[PathMoveSourceCol.SHORTEST_PATH_LENGTH].notna()) & (
                 self.df[PathMoveSourceCol.NUM_MOVED].notna()) & (
                                                             self.df[PathMoveSourceCol.DECAYING_PATH_TYPE] == PathStatus.NOT_COMPUTED)])],
-            ['Percentage of Unreachable Fuzzy Neighbors (%)', *get_col_stats(unreachable_percentage['value'])],
+            ['Percentage of Unreachable Blind Neighbors (%)', *get_col_stats(unreachable_percentage['value'])],
             ['Kissing Neighbors', self.orc.num_kissing_neighbors],
             ['Pairs w/ No Sweet Path', (self.df[PathMoveSourceCol.SWEET_PATH_TYPE] == PathStatus.NO_PATH).sum()],
             ['Pairs w/ Blocked Sweet Path', (self.df[PathMoveSourceCol.SWEET_PATH_TYPE] == PathStatus.BLOCKED).sum()],
             ['Pairs w/ Sweet Path', (self.df[PathMoveSourceCol.SWEET_PATH_TYPE] == PathStatus.EXISTS).sum()],
             ['Pairs w/ Decaying Path', (self.df[PathMoveSourceCol.DECAYING_HOPS] > 0).sum()],
-            ['Pairs w/ Fuzzy Path', (self.df[PathMoveSourceCol.FUZZY_HOPS] > 0).sum()],
+            ['Pairs w/ Blind Path', (self.df[PathMoveSourceCol.BLIND_HOPS] > 0).sum()],
             # ['Pairs w/ Decaying Path', (self.df[PathMoveSourceCol.DECAYING_PATH_TYPE] == PathStatus.EXISTS).sum()],
             ['Hops of All Paths', *get_col_stats(self.df[PathMoveSourceCol.SHORTEST_PATH_LENGTH])],
             ['Sweet Hops of All Paths', *get_col_stats(self.df[PathMoveSourceCol.SWEET_HOPS])],
             ['Decaying Hops of All Paths', *get_col_stats(self.df[PathMoveSourceCol.DECAYING_HOPS])],
-            ['Fuzzy Hops of All Paths', *get_col_stats(self.df[PathMoveSourceCol.FUZZY_HOPS])],
+            ['Blind Hops of All Paths', *get_col_stats(self.df[PathMoveSourceCol.BLIND_HOPS])],
             ['Hops of Sweet Paths', *get_col_stats(sweet_paths_df[PathMoveSourceCol.SHORTEST_PATH_LENGTH])],
             ['Hops of Decaying Paths', *get_col_stats(decaying_paths_df[PathMoveSourceCol.SHORTEST_PATH_LENGTH])],
             ['Decaying Hops of Decaying Paths', *get_col_stats(decaying_paths_df[PathMoveSourceCol.DECAYING_HOPS])],

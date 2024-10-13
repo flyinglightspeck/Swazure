@@ -355,11 +355,11 @@ def compare_paths(ref_df, df):
 
 
 def get_general_metrics(df):
-    total_fuzzy_pairs = df.shape[0]
+    total_blind_pairs = df.shape[0]
     pairs_without_path = len(df[(df['Path Type'] == 'No Path')])
     pairs_with_sweet_path = len(df[(df['Path Type'] == 'Sweet')])
     pairs_with_decaying_path = len(df[(df['Path Type'] == 'Decaying')])
-    return total_fuzzy_pairs, pairs_without_path, pairs_with_sweet_path, pairs_with_decaying_path
+    return total_blind_pairs, pairs_without_path, pairs_with_sweet_path, pairs_with_decaying_path
 
 
 def compare_hops(src_dir):
@@ -384,7 +384,7 @@ def compare_hops(src_dir):
          "Technique",
          "Shape",
          "Beta",
-         "Total Fuzzy Pairs", "Pairs w/ No Path", "Pairs w/ Sweet Path", "Pairs w/ Decaying Path",
+         "Total Blind Pairs", "Pairs w/ No Path", "Pairs w/ Sweet Path", "Pairs w/ Decaying Path",
          "No Path -> Sweet", "Decaying -> Sweet", "Decaying -> No Path", "Remained Decaying", "Remained Sweet", "Remained No Path"]
     ]
 
