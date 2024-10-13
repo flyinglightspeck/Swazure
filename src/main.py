@@ -26,11 +26,11 @@ if __name__ == '__main__':
     arg_parser.add_argument('--scale', required=False, type=float, default=13.6,
                             help='Scale factor for point cloud coordinates.')
     arg_parser.add_argument('--radius-beta', required=False, type=float, default=.5,
-                            help="Ratio of FLS radius to the minimum distance between FLSs.")
+                            help="The ratio of FLS radius to the minimum distance between FLSs.")
     arg_parser.add_argument('--radius', required=False, type=float, default=0,
                             help="Set radius explicitly (cm). If set to a non-zero value radius_beta will be ignored.")
     arg_parser.add_argument('--sweet-range-min', required=False, type=float, default=6,
-                            help="Sweet range start. The maximum working range of the tracking device (cm).")
+                            help="Sweet range start. The minimum working range of the tracking device (cm). Below this threshold is considered as the blind range.")
     arg_parser.add_argument('--sweet-range-max', required=False, type=float, default=8, help="Sweet range end (cm).")
     arg_parser.add_argument('--decaying-range-min', required=False, type=float, default=8,
                             help="Decaying range start (cm).")
@@ -41,9 +41,9 @@ if __name__ == '__main__':
     arg_parser.add_argument('--dead-reckoning-angle', required=False, type=float, default=0,
                             help="Dead reckoning angle (degree).")
     arg_parser.add_argument('--steps-threshold', required=False, type=int, default=2,
-                            help="Maximum amount of steps the source FLS explores as a factor of its radius.")
+                            help="The maximum steps the source FLS explores as a factor of its radius.")
     arg_parser.add_argument('--weighted', action='store_true', required=False, default=False,
-                            help="If passed, use euclidean distance as the weight in the shortest path computation. Otherwize use shortest hops.")
+                            help="If passed, use Euclidean distance as the weight in the shortest path computation. Otherwise, use the shortest hops.")
     args = arg_parser.parse_args()
 
     if args.alg == 'swazure':
