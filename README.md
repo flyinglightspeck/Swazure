@@ -1,6 +1,8 @@
 # Swazure
 Swazure solves the missing sensor data using cooperation among FLSs.  It implements physical data independence by abstracting the physical characteristics of the sensors, making point cloud data independent of the sensor hardware.
 
+Authors:  Hamed Alimohammadzadeh(halimoha@usc.edu) and Shahram Ghandeharizadeh (shahram@usc.edu)
+
 ## Run
 Clone the repository and open it with Pycharm to set up a virtual environment and install the requirements.
 
@@ -23,10 +25,10 @@ options:
                         move_blocking+: use the shortest path and move the blocking FLSs, move_source+: move the source to find a common sweet FLS.
   --scale SCALE         Scale factor for point cloud coordinates.
   --radius-beta RADIUS_BETA
-                        Ratio of FLS radius to the minimum distance between FLSs.
+                        The ratio of FLS radius to the minimum distance between FLSs.
   --radius RADIUS       Set radius explicitly (cm). If set to a non-zero value radius_beta will be ignored.
   --sweet-range-min SWEET_RANGE_MIN
-                        Sweet range start. The maximum working range of the tracking device (cm).
+                        Sweet range start. The minimum working range of the tracking device (cm). Below this threshold is considered as the blind range.
   --sweet-range-max SWEET_RANGE_MAX
                         Sweet range end (cm).
   --decaying-range-min DECAYING_RANGE_MIN
@@ -37,6 +39,6 @@ options:
   --dead-reckoning-angle DEAD_RECKONING_ANGLE
                         Dead reckoning angle (degree).
   --steps-threshold STEPS_THRESHOLD
-                        Maximum amount of steps the source FLS explores as a factor of its radius.
-  --weighted            If passed, use euclidean distance as the weight in the shortest path computation. Otherwize use shortest hops.
+                        The maximum steps the source FLS explores as a factor of its radius.
+  --weighted            If passed, use Euclidean distance as the weight in the shortest path computation. Otherwise, use the shortest hops.
 ```
