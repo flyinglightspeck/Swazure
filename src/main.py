@@ -21,7 +21,7 @@ if __name__ == '__main__':
                             help="Name of the algorithm to run.")
     arg_parser.add_argument('--solution',
                             choices=['shortest', 'averaging', 'move_blocking', 'move_blocking+', 'move_source', 'move_source+'],
-                            default='move_blocking+',
+                            default='shortest',
                             help="Name of the solution to run. shortest: use the shortest shortest path, averaging: average the first two shotrtest paths when available, move_blocking+: use the shortest path and move the blocking FLSs, move_source+: move the source to find a common sweet FLS.")
     arg_parser.add_argument('--scale', required=False, type=float, default=13.6,
                             help='Scale factor for point cloud coordinates.')
