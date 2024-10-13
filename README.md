@@ -1,6 +1,8 @@
 # Swazure
 Swazure solves the missing sensor data using cooperation among FLSs.  It implements physical data independence by abstracting the physical characteristics of the sensors, making point cloud data independent of the sensor hardware.
 
+Authors:  Hamed Alimohammadzadeh(halimoha@usc.edu) and Shahram Ghandeharizadeh (shahram@usc.edu)
+
 ## Run
 Clone the repository and open it with Pycharm to set up a virtual environment and install the requirements.
 
